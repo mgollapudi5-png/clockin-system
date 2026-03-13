@@ -1,69 +1,106 @@
-<div class="section">
+<div class="emp-section">
 
   <div class="section-header">
-    <div>
-      <h2>Employee Management</h2>
-      <p>View and manage employee roles</p>
-    </div>
-    <button class="btn btn-primary" (click)="loadEmployees()" [disabled]="loading">
-      <span class="spinner" *ngIf="loading"></span>
-      Refresh
-    </button>
+    <h2>Employee Display</h2>
+    <button class="btn-refresh" (click)="loadEmployees()" [disabled]="loading">Refresh</button>
   </div>
 
-  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+  <div class="alert-error" *ngIf="error">{{ error }}</div>
 
-  <div class="card" *ngIf="!loading || employees.length > 0">
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Employee Name</th>
-            <th>Employee ID</th>
-            <th>Role</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let emp of employees; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>
-              <div class="emp-name">
-                <div class="avatar">{{ emp.employeeName.charAt(0).toUpperCase() }}</div>
-                {{ emp.employeeName }}
-              </div>
-            </td>
+  <!-- Employee Table -->
+  <div class="table-wrap" *ngIf="!loading || employees.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>Employee ID</th>
+          <th>Employee Name</th>
+          <th>Password</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let emp of employees">
+
+          <!-- Normal row -->
+          <ng-container *ngIf="editingId !== emp.id">
             <td><code>{{ emp.employeeId }}</code></td>
+            <td>{{ emp.employeeName }}</td>
+            <td><span class="pw-mask">&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;</span></td>
             <td>
-              <span class="badge" [ngClass]="emp.role === 'ADMIN' ? 'badge-admin' : 'badge-employee'">
-                {{ emp.role }}
-              </span>
+              <span class="role-badge" [class.admin]="emp.role === 'ADMIN'">{{ emp.role }}</span>
             </td>
-            <td>
-              <button
-                class="btn btn-role"
-                [class.demote]="emp.role === 'ADMIN'"
-                (click)="toggleRole(emp)"
-                [disabled]="updatingId === emp.id">
-                <span class="spinner sm" *ngIf="updatingId === emp.id"></span>
-                <span *ngIf="updatingId !== emp.id">
-                  {{ emp.role === 'ADMIN' ? 'Make Employee' : 'Make Admin' }}
-                </span>
+            <td class="actions">
+              <button class="btn-edit" (click)="startEdit(emp)">Edit</button>
+              <button class="btn-delete" (click)="deleteEmployee(emp)" [disabled]="deletingId === emp.id">
+                {{ deletingId === emp.id ? '...' : 'Delete' }}
               </button>
             </td>
-          </tr>
-          <tr *ngIf="employees.length === 0 && !loading">
-            <td colspan="5" class="empty">No employees found.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+          </ng-container>
+
+          <!-- Edit row -->
+          <ng-container *ngIf="editingId === emp.id">
+            <td><code>{{ emp.employeeId }}</code></td>
+            <td><input class="edit-input" [(ngModel)]="editData.employeeName" placeholder="Name" /></td>
+            <td><input class="edit-input" [(ngModel)]="editData.password" type="password" placeholder="New password (optional)" /></td>
+            <td>
+              <select class="edit-select" [(ngModel)]="editData.role">
+                <option value="EMPLOYEE">EMPLOYEE</option>
+                <option value="ADMIN">ADMIN</option>
+              </select>
+            </td>
+            <td class="actions">
+              <button class="btn-save" (click)="saveEdit(emp)" [disabled]="savingId === emp.id">
+                {{ savingId === emp.id ? 'Saving...' : 'Save' }}
+              </button>
+              <button class="btn-cancel" (click)="cancelEdit()">Cancel</button>
+            </td>
+          </ng-container>
+
+        </tr>
+        <tr *ngIf="employees.length === 0 && !loading">
+          <td colspan="5" class="empty-row">No employees found.</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <!-- Loading skeleton -->
-  <div class="loading-state" *ngIf="loading && employees.length === 0">
+  <div *ngIf="loading && employees.length === 0" class="loading-rows">
     <div class="skeleton" *ngFor="let i of [1,2,3]"></div>
+  </div>
+
+  <!-- Add Employee Form -->
+  <div class="add-section">
+    <h3>Add User</h3>
+    <div class="add-error" *ngIf="addError">{{ addError }}</div>
+    <div class="add-form">
+      <div class="add-field">
+        <label>Employee ID</label>
+        <input [(ngModel)]="newEmp.employeeId" placeholder="e.g. EMP102" />
+      </div>
+      <div class="add-field">
+        <label>Employee Name</label>
+        <input [(ngModel)]="newEmp.employeeName" placeholder="Full name" />
+      </div>
+      <div class="add-field">
+        <label>Password</label>
+        <input [(ngModel)]="newEmp.password" type="password" placeholder="Password" />
+      </div>
+      <div class="add-field">
+        <label>Role</label>
+        <select [(ngModel)]="newEmp.role">
+          <option value="EMPLOYEE">EMPLOYEE</option>
+          <option value="ADMIN">ADMIN</option>
+        </select>
+      </div>
+      <div class="add-field add-btn-wrap">
+        <label>&nbsp;</label>
+        <button class="btn-create" (click)="addEmployee()" [disabled]="adding">
+          {{ adding ? 'Creating...' : 'Create' }}
+        </button>
+      </div>
+    </div>
   </div>
 
 </div>

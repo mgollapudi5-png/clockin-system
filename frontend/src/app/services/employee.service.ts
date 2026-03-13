@@ -16,12 +16,25 @@ export class EmployeeService {
     return this.http.get<Employee[]>(`${this.apiUrl}/employees`);
   }
 
+  createEmployee(data: { employeeId: string; employeeName: string; password: string; role: string }): Observable<Employee> {
+    return this.http.post<Employee>(`${this.apiUrl}/employees`, data);
+  }
+
+  updateEmployee(id: number, data: { employeeName: string; password: string; role: string }): Observable<Employee> {
+    return this.http.put<Employee>(`${this.apiUrl}/employees/${id}`, data);
+  }
+
+  deleteEmployee(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/employees/${id}`);
+  }
+
   updateRole(id: number, role: string): Observable<Employee> {
     return this.http.put<Employee>(`${this.apiUrl}/employees/${id}/role`, { role });
   }
 
-  getAttendance(fromDate: string, toDate: string): Observable<AttendanceRecord[]> {
-    const params = new HttpParams().set('fromDate', fromDate).set('toDate', toDate);
+  getAttendance(fromDate: string, toDate: string, employeeId?: string): Observable<AttendanceRecord[]> {
+    let params = new HttpParams().set('fromDate', fromDate).set('toDate', toDate);
+    if (employeeId) params = params.set('employeeId', employeeId);
     return this.http.get<AttendanceRecord[]>(`${this.apiUrl}/attendance`, { params });
   }
 }
