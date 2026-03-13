@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://your-production-domain.com/api'
+  apiUrl: 'https://clockin-system-grsv.onrender.com/api'
 };
