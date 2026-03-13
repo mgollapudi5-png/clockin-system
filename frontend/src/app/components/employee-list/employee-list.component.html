@@ -1,0 +1,69 @@
+<div class="section">
+
+  <div class="section-header">
+    <div>
+      <h2>Employee Management</h2>
+      <p>View and manage employee roles</p>
+    </div>
+    <button class="btn btn-primary" (click)="loadEmployees()" [disabled]="loading">
+      <span class="spinner" *ngIf="loading"></span>
+      Refresh
+    </button>
+  </div>
+
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+  <div class="card" *ngIf="!loading || employees.length > 0">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Employee Name</th>
+            <th>Employee ID</th>
+            <th>Role</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let emp of employees; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>
+              <div class="emp-name">
+                <div class="avatar">{{ emp.employeeName.charAt(0).toUpperCase() }}</div>
+                {{ emp.employeeName }}
+              </div>
+            </td>
+            <td><code>{{ emp.employeeId }}</code></td>
+            <td>
+              <span class="badge" [ngClass]="emp.role === 'ADMIN' ? 'badge-admin' : 'badge-employee'">
+                {{ emp.role }}
+              </span>
+            </td>
+            <td>
+              <button
+                class="btn btn-role"
+                [class.demote]="emp.role === 'ADMIN'"
+                (click)="toggleRole(emp)"
+                [disabled]="updatingId === emp.id">
+                <span class="spinner sm" *ngIf="updatingId === emp.id"></span>
+                <span *ngIf="updatingId !== emp.id">
+                  {{ emp.role === 'ADMIN' ? 'Make Employee' : 'Make Admin' }}
+                </span>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="employees.length === 0 && !loading">
+            <td colspan="5" class="empty">No employees found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Loading skeleton -->
+  <div class="loading-state" *ngIf="loading && employees.length === 0">
+    <div class="skeleton" *ngFor="let i of [1,2,3]"></div>
+  </div>
+
+</div>

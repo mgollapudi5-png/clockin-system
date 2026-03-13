@@ -1,0 +1,104 @@
+<div class="section">
+
+  <div class="section-header">
+    <div>
+      <h2>Attendance Report</h2>
+      <p>Filter by date range to view employee working hours</p>
+    </div>
+  </div>
+
+  <!-- Filter Form -->
+  <div class="card filter-card">
+    <form [formGroup]="filterForm" (ngSubmit)="search()">
+      <div class="filter-row">
+        <div class="form-group">
+          <label for="fromDate">From Date</label>
+          <input id="fromDate" type="date" formControlName="fromDate" />
+        </div>
+        <div class="form-group">
+          <label for="toDate">To Date</label>
+          <input id="toDate" type="date" formControlName="toDate" />
+        </div>
+        <div class="form-group submit-group">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn btn-primary" [disabled]="loading || filterForm.invalid">
+            <span class="spinner" *ngIf="loading"></span>
+            <span *ngIf="!loading">Generate Report</span>
+            <span *ngIf="loading">Loading…</span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+  <!-- Results -->
+  <ng-container *ngIf="searched && !loading">
+
+    <!-- Summary -->
+    <div class="summary-bar" *ngIf="records.length > 0">
+      <div class="summary-item">
+        <span class="summary-label">Total Records</span>
+        <span class="summary-value">{{ records.length }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Total Hours Worked</span>
+        <span class="summary-value hours">{{ getTotalHours() | number:'1.2-2' }} hrs</span>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card" *ngIf="records.length > 0">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Employee Name</th>
+              <th>Employee ID</th>
+              <th>Date</th>
+              <th>Clock In</th>
+              <th>Clock Out</th>
+              <th>Total Hours</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of records; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td><strong>{{ r.employeeName }}</strong></td>
+              <td><code>{{ r.employeeId }}</code></td>
+              <td>{{ r.date }}</td>
+              <td>
+                <span class="badge badge-in">{{ r.clockInTime }}</span>
+              </td>
+              <td>
+                <span *ngIf="r.clockOutTime !== 'In Progress'" class="badge badge-out">
+                  {{ r.clockOutTime }}
+                </span>
+                <span *ngIf="r.clockOutTime === 'In Progress'" class="badge badge-in">
+                  In Progress
+                </span>
+              </td>
+              <td>
+                <strong *ngIf="r.totalHours !== null" class="hours-cell">
+                  {{ r.totalHours | number:'1.2-2' }} hrs
+                </strong>
+                <span *ngIf="r.totalHours === null" class="in-progress">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="records.length === 0">
+      <div class="empty-icon">📋</div>
+      <h3>No Records Found</h3>
+      <p>No attendance data found for the selected date range.</p>
+    </div>
+
+  </ng-container>
+
+</div>

@@ -1,0 +1,78 @@
+<div class="dashboard-page">
+
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <span class="top-bar-brand">ClockIn System</span>
+    <div class="top-bar-user">
+      <span>{{ currentUser?.employeeName }}</span>
+      <button class="btn btn-outline" (click)="logout()">Sign Out</button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <div class="clock-card">
+
+      <!-- Greeting -->
+      <div class="greeting">
+        <h2>Welcome back, <strong>{{ currentUser?.employeeName }}</strong></h2>
+        <p>Employee ID: {{ currentUser?.employeeId }}</p>
+      </div>
+
+      <!-- Live Clock -->
+      <div class="live-clock">
+        <div class="time">{{ currentTime | date:'HH:mm:ss' }}</div>
+        <div class="date">{{ currentTime | date:'EEEE, MMMM d, yyyy' }}</div>
+      </div>
+
+      <!-- Status Badge -->
+      <div class="status-section">
+        <span class="status-badge" [class.clocked-in]="isClockedIn" [class.clocked-out]="!isClockedIn">
+          <span class="status-dot"></span>
+          {{ isClockedIn ? 'CLOCKED IN' : 'CLOCKED OUT' }}
+        </span>
+      </div>
+
+      <!-- Last Session Info -->
+      <div class="session-info" *ngIf="lastClockIn">
+        <div class="info-row" *ngIf="lastClockIn">
+          <span class="info-label">Clock In</span>
+          <span class="info-value">{{ lastClockIn }}</span>
+        </div>
+        <div class="info-row" *ngIf="lastClockOut">
+          <span class="info-label">Clock Out</span>
+          <span class="info-value">{{ lastClockOut }}</span>
+        </div>
+        <div class="info-row" *ngIf="lastTotalHours !== null">
+          <span class="info-label">Hours Worked</span>
+          <span class="info-value hours">{{ lastTotalHours | number:'1.2-2' }} hrs</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button
+          class="btn btn-success"
+          (click)="clockIn()"
+          [disabled]="isClockedIn || loading">
+          <span class="spinner" *ngIf="loading && !isClockedIn"></span>
+          Clock In
+        </button>
+        <button
+          class="btn btn-danger"
+          (click)="clockOut()"
+          [disabled]="!isClockedIn || loading">
+          <span class="spinner" *ngIf="loading && isClockedIn"></span>
+          Clock Out
+        </button>
+      </div>
+
+      <!-- Message -->
+      <div class="alert" [ngClass]="'alert-' + messageType" *ngIf="message">
+        {{ message }}
+      </div>
+
+    </div>
+  </main>
+
+</div>

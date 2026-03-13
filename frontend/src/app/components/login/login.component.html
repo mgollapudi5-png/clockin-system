@@ -1,0 +1,65 @@
+<div class="login-page">
+  <div class="login-card">
+
+    <div class="login-header">
+      <div class="logo-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="20" fill="#1a73e8"/>
+          <path d="M20 10v10l6 3" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="20" cy="20" r="8" stroke="white" stroke-width="2.5" fill="none"/>
+        </svg>
+      </div>
+      <h1>Employee Portal</h1>
+      <p>Clock In / Clock Out System</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+
+      <div class="form-group">
+        <label for="identifier">Employee ID or Name</label>
+        <input
+          id="identifier"
+          type="text"
+          formControlName="identifier"
+          placeholder="Enter your Employee ID or name"
+          autocomplete="username"
+        />
+        <span class="error-hint"
+              *ngIf="identifierCtrl?.invalid && identifierCtrl?.touched">
+          Employee ID or name is required.
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+          />
+          <button type="button" class="toggle-pw" (click)="showPassword = !showPassword" tabindex="-1">
+            {{ showPassword ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+        <span class="error-hint"
+              *ngIf="passwordCtrl?.invalid && passwordCtrl?.touched">
+          Password is required.
+        </span>
+      </div>
+
+      <div class="alert alert-error" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full" [disabled]="loading">
+        <span class="spinner" *ngIf="loading"></span>
+        <span *ngIf="!loading">Sign In</span>
+        <span *ngIf="loading">Signing In…</span>
+      </button>
+
+    </form>
+  </div>
+</div>
