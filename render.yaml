@@ -2,6 +2,6 @@ services:
   - type: web
     name: clockin-backend
     env: docker
-    dockerfilePath: ./backend/Dockerfile
+    dockerfilePath: ./Dockerfile
     plan: free
-    buildContext: ./backend
+    region: oregon
