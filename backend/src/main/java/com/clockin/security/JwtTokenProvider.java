@@ -21,10 +21,11 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
-    public String generateToken(String employeeId, String role) {
+    public String generateToken(String employeeId, String role, String storeId) {
         return Jwts.builder()
                 .setSubject(employeeId)
                 .claim("role", role)
+                .claim("storeId", storeId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -37,6 +38,10 @@ public class JwtTokenProvider {
 
     public String getRoleFromToken(String token) {
         return getClaims(token).get("role", String.class);
+    }
+
+    public String getStoreIdFromToken(String token) {
+        return getClaims(token).get("storeId", String.class);
     }
 
     public boolean validateToken(String token) {

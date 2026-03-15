@@ -14,6 +14,7 @@ export class LoginComponent implements OnInit {
   loading = false;
   errorMessage = '';
   showPassword = false;
+  isKiosk = false; // true when a kiosk session is active on this device
 
   constructor(
     private fb: FormBuilder,
@@ -22,15 +23,17 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Redirect if already logged in
     if (this.authService.isLoggedIn()) {
       this.redirectByRole();
       return;
     }
 
+    this.isKiosk = !!this.authService.getKioskStoreId();
+
     this.loginForm = this.fb.group({
       identifier: ['', [Validators.required]],
-      password:   ['', [Validators.required]]
+      password:   ['', [Validators.required]],
+      storeId:    ['', this.isKiosk ? [] : [Validators.required]]
     });
   }
 
@@ -63,4 +66,5 @@ export class LoginComponent implements OnInit {
 
   get identifierCtrl() { return this.loginForm.get('identifier'); }
   get passwordCtrl()   { return this.loginForm.get('password'); }
+  get storeIdCtrl()    { return this.loginForm.get('storeId'); }
 }

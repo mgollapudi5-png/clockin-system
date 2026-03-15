@@ -11,4 +11,7 @@ public class LoginRequest {
 
     @NotBlank(message = "Password is required")
     private String password;
+
+    // Optional: provided when logging in without an active kiosk session (e.g. admin from home)
+    private String storeId;
 }

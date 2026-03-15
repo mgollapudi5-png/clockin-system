@@ -3,8 +3,11 @@ package com.clockin.service;
 import com.clockin.dto.CreateStoreRequest;
 import com.clockin.dto.StoreDTO;
 import com.clockin.dto.StoreSessionDTO;
+import com.clockin.entity.Employee;
+import com.clockin.entity.Role;
 import com.clockin.entity.Store;
 import com.clockin.entity.StoreRole;
+import com.clockin.repository.EmployeeRepository;
 import com.clockin.repository.StoreRepository;
 import com.clockin.repository.StoreSessionRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,7 @@ public class StoreManagementService {
 
     private final StoreRepository storeRepository;
     private final StoreSessionRepository storeSessionRepository;
+    private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -53,7 +57,20 @@ public class StoreManagementService {
                 ? StoreRole.CREATOR : StoreRole.STORE_OWNER);
         store.setActive(true);
 
-        return toDTO(storeRepository.save(store));
+        Store saved = storeRepository.save(store);
+
+        // Auto-create default 'owner' ADMIN for every STORE_OWNER store
+        if (saved.getRole() == StoreRole.STORE_OWNER) {
+            Employee owner = new Employee();
+            owner.setEmployeeId("owner");
+            owner.setEmployeeName("Store Owner");
+            owner.setPassword(passwordEncoder.encode("owner123"));
+            owner.setRole(Role.ADMIN);
+            owner.setStore(saved);
+            employeeRepository.save(owner);
+        }
+
+        return toDTO(saved);
     }
 
     @Transactional

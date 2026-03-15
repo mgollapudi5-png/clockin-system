@@ -5,7 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "employees")
+@Table(name = "employees",
+    uniqueConstraints = @UniqueConstraint(name = "uq_employee_id_store", columnNames = {"employee_id", "store_id"}))
 @Data
 @NoArgsConstructor
 public class Employee {
@@ -14,7 +15,7 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "employee_id", unique = true, nullable = false, length = 50)
+    @Column(name = "employee_id", nullable = false, length = 50)
     private String employeeId;
 
     @Column(name = "employee_name", nullable = false, length = 100)
@@ -26,4 +27,8 @@ public class Employee {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role = Role.EMPLOYEE;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "store_id")
+    private Store store;
 }

@@ -8,6 +8,7 @@ import com.clockin.repository.EmployeeRepository;
 import com.clockin.repository.StoreRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -18,45 +19,49 @@ public class DataInitializer implements CommandLineRunner {
     private final EmployeeRepository employeeRepository;
     private final StoreRepository storeRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public void run(String... args) {
-        if (employeeRepository.count() == 0) {
-            Employee admin = new Employee();
-            admin.setEmployeeId("ADMIN001");
-            admin.setEmployeeName("System Admin");
-            admin.setPassword(passwordEncoder.encode("admin123"));
-            admin.setRole(Role.ADMIN);
-            employeeRepository.save(admin);
 
-            Employee emp = new Employee();
-            emp.setEmployeeId("EMP001");
-            emp.setEmployeeName("John Doe");
-            emp.setPassword(passwordEncoder.encode("emp123"));
-            emp.setRole(Role.EMPLOYEE);
-            employeeRepository.save(emp);
+        // Drop the old global unique constraint on employee_id (replaced by composite unique per store)
+        jdbcTemplate.execute(
+            "DO $$ BEGIN " +
+            "IF EXISTS (SELECT 1 FROM pg_indexes WHERE tablename='employees' AND indexname='employees_employee_id_key') THEN " +
+            "ALTER TABLE employees DROP CONSTRAINT employees_employee_id_key; " +
+            "END IF; END $$"
+        );
 
-            System.out.println("===========================================");
-            System.out.println("Default users seeded:");
-            System.out.println("  Admin    → ID: ADMIN001 / Password: admin123");
-            System.out.println("  Employee → ID: EMP001   / Password: emp123");
-            System.out.println("===========================================");
-        }
+        // Ensure creator store exists
+        Store creatorStore = storeRepository.findByStoreId("CREATOR001").orElseGet(() -> {
+            Store s = new Store();
+            s.setStoreId("CREATOR001");
+            s.setStoreName("Platform Creator");
+            s.setPasswordHash(passwordEncoder.encode("creator123"));
+            s.setRole(StoreRole.CREATOR);
+            s.setDeviceLimit(99);
+            s.setActive(true);
+            return storeRepository.save(s);
+        });
 
-        if (storeRepository.count() == 0) {
-            Store creator = new Store();
-            creator.setStoreId("CREATOR001");
-            creator.setStoreName("Platform Creator");
-            creator.setPasswordHash(passwordEncoder.encode("creator123"));
-            creator.setRole(StoreRole.CREATOR);
-            creator.setDeviceLimit(99);
-            creator.setActive(true);
-            storeRepository.save(creator);
+        // Assign any orphan employees (no store) to creator store
+        employeeRepository.findAll().stream()
+            .filter(e -> e.getStore() == null)
+            .forEach(e -> {
+                e.setStore(creatorStore);
+                employeeRepository.save(e);
+            });
 
-            System.out.println("===========================================");
-            System.out.println("Default store portal users seeded:");
-            System.out.println("  Creator → ID: CREATOR001 / Password: creator123");
-            System.out.println("===========================================");
+        // Auto-create default 'owner' admin for creator store if not present
+        if (!employeeRepository.existsByEmployeeIdAndStore("owner", creatorStore)) {
+            Employee owner = new Employee();
+            owner.setEmployeeId("owner");
+            owner.setEmployeeName("Store Owner");
+            owner.setPassword(passwordEncoder.encode("owner123"));
+            owner.setRole(Role.ADMIN);
+            owner.setStore(creatorStore);
+            employeeRepository.save(owner);
+            System.out.println("Default admin created for CREATOR001 → ID: owner / Password: owner123");
         }
     }
 }
