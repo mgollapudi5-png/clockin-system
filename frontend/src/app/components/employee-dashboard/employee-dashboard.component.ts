@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ClockService } from '../../services/clock.service';
 import { CurrentUser } from '../../models/employee.model';
@@ -24,11 +25,23 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
-    private clockService: ClockService
+    private clockService: ClockService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
+
+    // Employees must be on an authorized kiosk device — admins can log in from anywhere
+    if (this.currentUser?.role === 'EMPLOYEE') {
+      const kioskSession = localStorage.getItem('kioskSession');
+      if (!kioskSession) {
+        this.authService.logout();
+        this.router.navigate(['/store-portal']);
+        return;
+      }
+    }
+
     this.clockInterval = setInterval(() => this.currentTime = new Date(), 1000);
     this.loadStatus();
   }
