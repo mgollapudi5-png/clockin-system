@@ -139,7 +139,7 @@ export class AttendanceReportComponent implements OnInit {
   }
 
   getTotalHours(): number {
-    return this.records.filter(r => r.totalHours != null).reduce((s, r) => s + (r.totalHours ?? 0), 0);
+    return this.filteredSummaries.reduce((s, emp) => s + emp.totalHours, 0);
   }
 
   private fmt(d: Date): string {
