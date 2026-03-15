@@ -7,10 +7,10 @@
     </div>
     <div class="nav-right">
       <span class="nav-user">{{ creatorName }}</span>
-      <button class="nav-tabs">
+      <div class="nav-tabs">
         <button [class.active]="activeTab === 'stores'" (click)="activeTab = 'stores'">All Stores</button>
         <button [class.active]="activeTab === 'create'" (click)="activeTab = 'create'">+ Create Store</button>
-      </button>
+      </div>
       <button class="logout-btn" (click)="logout()">Logout</button>
     </div>
   </nav>
