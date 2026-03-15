@@ -30,11 +30,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = extractToken(request);
 
         if (StringUtils.hasText(token) && tokenProvider.validateToken(token)) {
-            String employeeId = tokenProvider.getEmployeeIdFromToken(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(employeeId);
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            try {
+                String employeeId = tokenProvider.getEmployeeIdFromToken(token);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(employeeId);
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            } catch (Exception e) {
+                // Token belongs to a store/creator account — skip employee auth, let request proceed
+            }
         }
 
         filterChain.doFilter(request, response);
