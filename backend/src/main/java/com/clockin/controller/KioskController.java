@@ -3,6 +3,7 @@ package com.clockin.controller;
 import com.clockin.dto.ClockResponse;
 import com.clockin.dto.KioskClockRequest;
 import com.clockin.entity.Employee;
+import com.clockin.entity.Store;
 import com.clockin.repository.EmployeeRepository;
 import com.clockin.service.ClockService;
 import com.clockin.service.StoreAuthService;
@@ -29,14 +30,20 @@ public class KioskController {
             @RequestHeader(value = "X-Kiosk-Token", required = false) String kioskToken,
             @RequestBody KioskClockRequest request) {
 
-        // 1. Validate kiosk session
+        // 1. Validate kiosk session and get store
         if (kioskToken == null || !storeAuthService.verifyKioskSession(kioskToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Kiosk session not authorized. Please contact your admin."));
         }
 
-        // 2. Validate employee credentials
-        Employee employee = employeeRepository.findByEmployeeId(request.getEmployeeId())
+        Store store = storeAuthService.getStoreFromKioskToken(kioskToken);
+        if (store == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Kiosk session not authorized."));
+        }
+
+        // 2. Validate employee credentials (store-scoped)
+        Employee employee = employeeRepository.findByEmployeeIdAndStore(request.getEmployeeId(), store)
                 .orElse(null);
 
         if (employee == null || !passwordEncoder.matches(request.getPassword(), employee.getPassword())) {
@@ -48,9 +55,9 @@ public class KioskController {
         try {
             ClockResponse response;
             if ("IN".equalsIgnoreCase(request.getAction())) {
-                response = clockService.clockIn(employee.getEmployeeId());
+                response = clockService.clockIn(employee);
             } else if ("OUT".equalsIgnoreCase(request.getAction())) {
-                response = clockService.clockOut(employee.getEmployeeId());
+                response = clockService.clockOut(employee);
             } else {
                 return ResponseEntity.badRequest().body(Map.of("error", "Invalid action. Use IN or OUT."));
             }
@@ -71,12 +78,18 @@ public class KioskController {
                     .body(Map.of("error", "Kiosk session not authorized."));
         }
 
-        Employee employee = employeeRepository.findByEmployeeId(employeeId).orElse(null);
+        Store store = storeAuthService.getStoreFromKioskToken(kioskToken);
+        if (store == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Kiosk session not authorized."));
+        }
+
+        Employee employee = employeeRepository.findByEmployeeIdAndStore(employeeId, store).orElse(null);
         if (employee == null || !passwordEncoder.matches(password, employee.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Invalid employee ID or password"));
         }
 
-        return ResponseEntity.ok(clockService.getStatus(employee.getEmployeeId()));
+        return ResponseEntity.ok(clockService.getStatus(employee));
     }
 }
