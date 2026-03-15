@@ -1,0 +1,54 @@
+<div class="portal-container">
+  <div class="portal-card">
+    <div class="portal-header">
+      <div class="portal-icon">🏪</div>
+      <h1>Store Portal</h1>
+      <p>Enter your store credentials to continue</p>
+    </div>
+
+    <form (ngSubmit)="login()" #loginForm="ngForm" class="portal-form">
+      <div class="form-group">
+        <label for="storeId">Store ID</label>
+        <input
+          id="storeId"
+          type="text"
+          [(ngModel)]="storeId"
+          name="storeId"
+          placeholder="Enter Store ID"
+          required
+          autocomplete="off"
+          [disabled]="loading"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="password-wrapper">
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Enter Password"
+            required
+            [disabled]="loading"
+          />
+          <button type="button" class="toggle-pw" (click)="showPassword = !showPassword">
+            {{ showPassword ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+      <button type="submit" class="login-btn" [disabled]="loading || !storeId || !password">
+        <span *ngIf="!loading">Login</span>
+        <span *ngIf="loading">Logging in...</span>
+      </button>
+    </form>
+
+    <div class="portal-footer">
+      <a routerLink="/login">Employee / Admin Login</a>
+    </div>
+  </div>
+</div>

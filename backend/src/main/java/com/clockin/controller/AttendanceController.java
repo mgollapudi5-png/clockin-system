@@ -20,8 +20,7 @@ public class AttendanceController {
     @GetMapping
     public ResponseEntity<List<AttendanceDTO>> getAttendance(
             @RequestParam String fromDate,
-            @RequestParam String toDate,
-            @RequestParam(required = false) String employeeId) {
-        return ResponseEntity.ok(employeeService.getAttendance(fromDate, toDate, employeeId));
+            @RequestParam String toDate) {
+        return ResponseEntity.ok(employeeService.getAttendance(fromDate, toDate));
     }
 }

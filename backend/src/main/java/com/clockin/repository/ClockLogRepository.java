@@ -16,8 +16,6 @@ public interface ClockLogRepository extends JpaRepository<ClockLog, Long> {
 
     Optional<ClockLog> findFirstByEmployeeAndClockOutTimeIsNullOrderByClockInTimeDesc(Employee employee);
 
-    void deleteByEmployee(Employee employee);
-
     @Query("SELECT c FROM ClockLog c JOIN FETCH c.employee WHERE c.clockInTime BETWEEN :from AND :to ORDER BY c.employee.employeeName, c.clockInTime")
     List<ClockLog> findByDateRange(
             @Param("from") LocalDateTime from,

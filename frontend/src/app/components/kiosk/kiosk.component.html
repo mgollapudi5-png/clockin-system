@@ -1,0 +1,71 @@
+<div class="kiosk-container">
+  <!-- Header -->
+  <div class="kiosk-header">
+    <div class="store-name">🏪 {{ storeName }}</div>
+    <div class="clock-display">
+      <div class="time">{{ currentTime }}</div>
+      <div class="date">{{ currentDate }}</div>
+    </div>
+  </div>
+
+  <!-- Clock-In Form -->
+  <div class="kiosk-body">
+    <div class="kiosk-card">
+      <h2>Employee Clock In / Out</h2>
+      <p class="subtitle">Enter your credentials and select an action</p>
+
+      <div class="kiosk-form">
+        <div class="form-group">
+          <label>Employee ID</label>
+          <input
+            type="text"
+            [(ngModel)]="employeeId"
+            placeholder="Enter your Employee ID"
+            autocomplete="off"
+            [disabled]="loading"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <div class="pw-wrapper">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="password"
+              placeholder="Enter your Password"
+              [disabled]="loading"
+            />
+            <button type="button" class="toggle-pw" (click)="showPassword = !showPassword">
+              {{ showPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button
+            class="btn-in"
+            (click)="clockAction('IN')"
+            [disabled]="loading || !employeeId || !password"
+          >
+            <span class="btn-icon">↓</span>
+            <span>Clock In</span>
+          </button>
+          <button
+            class="btn-out"
+            (click)="clockAction('OUT')"
+            [disabled]="loading || !employeeId || !password"
+          >
+            <span class="btn-icon">↑</span>
+            <span>Clock Out</span>
+          </button>
+        </div>
+
+        <div *ngIf="loading" class="loading-msg">Processing...</div>
+
+        <div *ngIf="message" class="result-msg" [class.success]="messageType === 'success'" [class.error]="messageType === 'error'">
+          {{ message }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

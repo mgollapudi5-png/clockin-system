@@ -12,6 +12,9 @@ import { EmployeeDashboardComponent } from './components/employee-dashboard/empl
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
 import { EmployeeListComponent } from './components/employee-list/employee-list.component';
 import { AttendanceReportComponent } from './components/attendance-report/attendance-report.component';
+import { StorePortalComponent } from './components/store-portal/store-portal.component';
+import { CreatorPanelComponent } from './components/creator-panel/creator-panel.component';
+import { KioskComponent } from './components/kiosk/kiosk.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +23,10 @@ import { AttendanceReportComponent } from './components/attendance-report/attend
     EmployeeDashboardComponent,
     AdminDashboardComponent,
     EmployeeListComponent,
-    AttendanceReportComponent
+    AttendanceReportComponent,
+    StorePortalComponent,
+    CreatorPanelComponent,
+    KioskComponent
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,187 @@
+<div class="creator-container">
+  <!-- Navbar -->
+  <nav class="creator-nav">
+    <div class="nav-brand">
+      <span class="nav-icon">🏪</span>
+      <span>Store Manager</span>
+    </div>
+    <div class="nav-right">
+      <span class="nav-user">{{ creatorName }}</span>
+      <button class="nav-tabs">
+        <button [class.active]="activeTab === 'stores'" (click)="activeTab = 'stores'">All Stores</button>
+        <button [class.active]="activeTab === 'create'" (click)="activeTab = 'create'">+ Create Store</button>
+      </button>
+      <button class="logout-btn" (click)="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="creator-body">
+
+    <!-- STORES TAB -->
+    <div *ngIf="activeTab === 'stores'">
+      <div class="filters-bar">
+        <input
+          type="text"
+          placeholder="Search by store name or ID..."
+          [(ngModel)]="searchTerm"
+          (input)="applyFilter()"
+          class="search-input"
+        />
+        <div class="filter-btns">
+          <button [class.active]="filterStatus === 'all'" (click)="filterStatus='all'; applyFilter()">All</button>
+          <button [class.active]="filterStatus === 'active'" (click)="filterStatus='active'; applyFilter()">Active</button>
+          <button [class.active]="filterStatus === 'inactive'" (click)="filterStatus='inactive'; applyFilter()">Inactive</button>
+        </div>
+      </div>
+
+      <div *ngIf="loading" class="center-msg">Loading stores...</div>
+      <div *ngIf="error" class="error-msg">{{ error }}</div>
+
+      <div *ngIf="!loading && filteredStores.length === 0" class="center-msg">No stores found.</div>
+
+      <div class="stores-table" *ngIf="!loading && pagedStores.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Store Name</th>
+              <th>Store ID</th>
+              <th>Role</th>
+              <th>Sessions</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let store of pagedStores">
+              <td>{{ store.storeName }}</td>
+              <td class="mono">{{ store.storeId }}</td>
+              <td><span class="badge" [class.creator]="store.role === 'CREATOR'">{{ store.role }}</span></td>
+              <td>{{ store.activeSessions }}/{{ store.deviceLimit }}</td>
+              <td><span class="status-dot" [class.active]="store.active">{{ store.active ? 'Active' : 'Inactive' }}</span></td>
+              <td><button class="manage-btn" (click)="openManage(store)">Manage</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button [disabled]="currentPage === 1" (click)="currentPage = currentPage - 1">← Prev</button>
+        <span>Page {{ currentPage }} / {{ totalPages }}</span>
+        <button [disabled]="currentPage === totalPages" (click)="currentPage = currentPage + 1">Next →</button>
+      </div>
+    </div>
+
+    <!-- CREATE TAB -->
+    <div *ngIf="activeTab === 'create'" class="create-form-card">
+      <h2>Create New Store</h2>
+
+      <div *ngIf="createSuccess" class="success-msg">{{ createSuccess }}</div>
+      <div *ngIf="createError" class="error-msg">{{ createError }}</div>
+
+      <form (ngSubmit)="createStore()" #createForm="ngForm" class="create-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Store Name</label>
+            <input type="text" [(ngModel)]="newStore.storeName" name="storeName" placeholder="e.g. Liquor Store ABC" required />
+          </div>
+          <div class="form-group">
+            <label>Store ID</label>
+            <input type="text" [(ngModel)]="newStore.storeId" name="storeId" placeholder="e.g. store_abc" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" [(ngModel)]="newStore.password" name="password" placeholder="Set password" required />
+          </div>
+          <div class="form-group">
+            <label>Device Limit</label>
+            <select [(ngModel)]="newStore.deviceLimit" name="deviceLimit">
+              <option [value]="1">1 device</option>
+              <option [value]="2">2 devices</option>
+              <option [value]="3">3 devices</option>
+              <option [value]="5">5 devices</option>
+              <option [value]="99">Unlimited</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Role</label>
+            <select [(ngModel)]="newStore.role" name="role">
+              <option value="STORE_OWNER">Store Owner</option>
+              <option value="CREATOR">Creator</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="create-btn" [disabled]="createLoading || !newStore.storeName || !newStore.storeId || !newStore.password">
+          {{ createLoading ? 'Creating...' : 'Create Store' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE MODAL -->
+<div class="modal-overlay" *ngIf="showManageModal" (click)="closeManage()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ selectedStore?.storeName }}</h3>
+      <button class="modal-close" (click)="closeManage()">✕</button>
+    </div>
+
+    <div class="modal-body" *ngIf="selectedStore">
+      <div class="store-info">
+        <span class="info-row"><strong>ID:</strong> {{ selectedStore.storeId }}</span>
+        <span class="info-row"><strong>Role:</strong> {{ selectedStore.role }}</span>
+        <span class="info-row"><strong>Status:</strong> {{ selectedStore.active ? 'Active' : 'Inactive' }}</span>
+        <span class="info-row"><strong>Sessions:</strong> {{ selectedStore.activeSessions }}/{{ selectedStore.deviceLimit }}</span>
+      </div>
+
+      <div class="devices-list" *ngIf="selectedStore.devices?.length">
+        <strong>Active Devices:</strong>
+        <div class="device-item" *ngFor="let d of selectedStore.devices">
+          <span class="device-info">{{ d.deviceInfo?.substring(0, 60) }}...</span>
+          <span class="device-time">Last active: {{ d.lastActive }}</span>
+        </div>
+      </div>
+      <div *ngIf="!selectedStore.devices?.length" class="no-devices">No active sessions</div>
+
+      <div class="manage-msg" *ngIf="manageMessage">{{ manageMessage }}</div>
+
+      <div class="modal-actions">
+        <div class="action-group">
+          <label>Device Limit</label>
+          <div class="inline-row">
+            <select [(ngModel)]="newLimit">
+              <option [value]="1">1</option>
+              <option [value]="2">2</option>
+              <option [value]="3">3</option>
+              <option [value]="5">5</option>
+              <option [value]="99">Unlimited</option>
+            </select>
+            <button class="btn-save" (click)="saveDeviceLimit()" [disabled]="manageLoading">Save</button>
+          </div>
+        </div>
+
+        <div class="action-group">
+          <label>Change Password</label>
+          <div class="inline-row">
+            <input type="password" [(ngModel)]="newPassword" placeholder="New password" />
+            <button class="btn-save" (click)="changePassword()" [disabled]="manageLoading || !newPassword">Set</button>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn-reset" (click)="resetSessions()" [disabled]="manageLoading">Reset Sessions</button>
+          <button class="btn-toggle" (click)="toggleActive()" [disabled]="manageLoading">
+            {{ selectedStore.active ? 'Deactivate Store' : 'Activate Store' }}
+          </button>
+          <button class="btn-promote" (click)="promoteToCreator()" [disabled]="manageLoading || selectedStore.role === 'CREATOR'">
+            Promote to Creator
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

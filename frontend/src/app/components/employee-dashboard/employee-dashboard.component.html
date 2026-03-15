@@ -1,53 +1,65 @@
-<div class="tracker-page">
+<div class="dashboard-page">
 
-  <!-- Header -->
-  <header class="tracker-header">
-    <span class="brand">Time Tracker</span>
-    <div class="header-right">
-      <span class="user-name">{{ currentUser?.employeeName }}</span>
-      <button class="btn-signout" (click)="logout()">Sign Out</button>
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <span class="top-bar-brand">ClockIn System</span>
+    <div class="top-bar-user">
+      <span>{{ currentUser?.employeeName }}</span>
+      <button class="btn btn-outline" (click)="logout()">Sign Out</button>
     </div>
   </header>
 
-  <!-- Main Card -->
-  <main class="tracker-main">
-    <div class="tracker-card">
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <div class="clock-card">
 
-      <!-- Live Date & Time -->
-      <div class="datetime-row">
-        <div class="date-block">
-          <div class="dt-label">DATE</div>
-          <div class="dt-value">{{ currentTime | date:'MM/dd/yyyy' }}</div>
-        </div>
-        <div class="clock-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <polyline points="12 6 12 12 16 14"/>
-          </svg>
-        </div>
-        <div class="time-block">
-          <div class="dt-label">TIME</div>
-          <div class="dt-value">{{ currentTime | date:'hh:mm:ss a' }}</div>
-        </div>
+      <!-- Greeting -->
+      <div class="greeting">
+        <h2>Welcome back, <strong>{{ currentUser?.employeeName }}</strong></h2>
+        <p>Employee ID: {{ currentUser?.employeeId }}</p>
       </div>
 
-      <!-- Status -->
-      <div class="status-row">
-        <span class="status-pill" [class.clocked-in]="isClockedIn" [class.clocked-out]="!isClockedIn">
+      <!-- Live Clock -->
+      <div class="live-clock">
+        <div class="time">{{ currentTime | date:'HH:mm:ss' }}</div>
+        <div class="date">{{ currentTime | date:'EEEE, MMMM d, yyyy' }}</div>
+      </div>
+
+      <!-- Status Badge -->
+      <div class="status-section">
+        <span class="status-badge" [class.clocked-in]="isClockedIn" [class.clocked-out]="!isClockedIn">
           <span class="status-dot"></span>
           {{ isClockedIn ? 'CLOCKED IN' : 'CLOCKED OUT' }}
         </span>
       </div>
 
+      <!-- Last Session Info -->
+      <div class="session-info" *ngIf="lastClockIn">
+        <div class="info-row" *ngIf="lastClockIn">
+          <span class="info-label">Clock In</span>
+          <span class="info-value">{{ lastClockIn }}</span>
+        </div>
+        <div class="info-row" *ngIf="lastClockOut">
+          <span class="info-label">Clock Out</span>
+          <span class="info-value">{{ lastClockOut }}</span>
+        </div>
+        <div class="info-row" *ngIf="lastTotalHours !== null">
+          <span class="info-label">Hours Worked</span>
+          <span class="info-value hours">{{ lastTotalHours | number:'1.2-2' }} hrs</span>
+        </div>
+      </div>
+
       <!-- Action Buttons -->
-      <div class="action-row">
-        <button class="btn-clock clock-in"
+      <div class="action-buttons">
+        <button
+          class="btn btn-success"
           (click)="clockIn()"
           [disabled]="isClockedIn || loading">
           <span class="spinner" *ngIf="loading && !isClockedIn"></span>
           Clock In
         </button>
-        <button class="btn-clock clock-out"
+        <button
+          class="btn btn-danger"
           (click)="clockOut()"
           [disabled]="!isClockedIn || loading">
           <span class="spinner" *ngIf="loading && isClockedIn"></span>
@@ -56,7 +68,7 @@
       </div>
 
       <!-- Message -->
-      <div class="msg" [ngClass]="'msg-' + messageType" *ngIf="message">
+      <div class="alert" [ngClass]="'alert-' + messageType" *ngIf="message">
         {{ message }}
       </div>
 

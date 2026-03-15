@@ -1,95 +1,41 @@
 <div class="admin-page">
 
-  <!-- Header -->
-  <header class="admin-header">
-    <span class="brand">Time Tracker</span>
-    <div class="header-right">
-      <span class="user-name">{{ currentUser?.employeeName }}</span>
-      <span class="badge-admin-tag">Admin</span>
-      <button class="btn-signout" (click)="logout()">Sign Out</button>
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <span class="top-bar-brand">ClockIn System &mdash; Admin</span>
+    <div class="top-bar-user">
+      <span>{{ currentUser?.employeeName }}</span>
+      <span class="badge badge-admin">Admin</span>
+      <button class="btn btn-outline" (click)="logout()">Sign Out</button>
     </div>
   </header>
 
-  <!-- Tab Nav -->
+  <!-- Tab Navigation -->
   <nav class="tab-nav">
-    <button class="tab-btn" [class.active]="activeTab === 'tracker'" (click)="activeTab = 'tracker'">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-      </svg>
-      Time Tracker
-    </button>
-    <button class="tab-btn" [class.active]="activeTab === 'employees'" (click)="activeTab = 'employees'">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'employees'"
+      (click)="activeTab = 'employees'">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
         <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
       </svg>
-      Employee Display
+      Employee Management
     </button>
-    <button class="tab-btn" [class.active]="activeTab === 'analysis'" (click)="activeTab = 'analysis'">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'attendance'"
+      (click)="activeTab = 'attendance'">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
         <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
       </svg>
-      Time Analysis
+      Attendance Report
     </button>
   </nav>
 
   <!-- Tab Content -->
   <div class="tab-content">
-
-    <!-- TIME TRACKER TAB -->
-    <div *ngIf="activeTab === 'tracker'" class="tracker-tab">
-      <div class="tracker-card">
-
-        <div class="datetime-row">
-          <div class="date-block">
-            <div class="dt-label">DATE</div>
-            <div class="dt-value">{{ currentTime | date:'MM/dd/yyyy' }}</div>
-          </div>
-          <div class="clock-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-          </div>
-          <div class="time-block">
-            <div class="dt-label">TIME</div>
-            <div class="dt-value">{{ currentTime | date:'hh:mm:ss a' }}</div>
-          </div>
-        </div>
-
-        <div class="status-row">
-          <span class="status-pill" [class.clocked-in]="isClockedIn" [class.clocked-out]="!isClockedIn">
-            <span class="status-dot"></span>
-            {{ isClockedIn ? 'CLOCKED IN' : 'CLOCKED OUT' }}
-          </span>
-        </div>
-
-        <div class="action-row">
-          <button class="btn-clock clock-in" (click)="clockIn()" [disabled]="isClockedIn || clockLoading">
-            <span class="spinner" *ngIf="clockLoading && !isClockedIn"></span>
-            Clock In
-          </button>
-          <button class="btn-clock clock-out" (click)="clockOut()" [disabled]="!isClockedIn || clockLoading">
-            <span class="spinner" *ngIf="clockLoading && isClockedIn"></span>
-            Clock Out
-          </button>
-        </div>
-
-        <div class="msg" [ngClass]="'msg-' + clockMessageType" *ngIf="clockMessage">
-          {{ clockMessage }}
-        </div>
-
-      </div>
-    </div>
-
-    <!-- EMPLOYEE DISPLAY TAB -->
-    <div *ngIf="activeTab === 'employees'">
-      <app-employee-list></app-employee-list>
-    </div>
-
-    <!-- TIME ANALYSIS TAB -->
-    <div *ngIf="activeTab === 'analysis'">
-      <app-attendance-report></app-attendance-report>
-    </div>
-
+    <app-employee-list  *ngIf="activeTab === 'employees'"></app-employee-list>
+    <app-attendance-report *ngIf="activeTab === 'attendance'"></app-attendance-report>
   </div>
 
 </div>

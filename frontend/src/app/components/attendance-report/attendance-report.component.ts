@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { EmployeeService } from '../../services/employee.service';
 import { AttendanceRecord } from '../../models/clock-log.model';
-import { Employee } from '../../models/employee.model';
 
 @Component({
   selector: 'app-attendance-report',
@@ -10,73 +10,51 @@ import { Employee } from '../../models/employee.model';
 })
 export class AttendanceReportComponent implements OnInit {
 
-  // Filter fields
-  selectedEmployeeId = '';
-  fromDate = '';
-  toDate = '';
-  startTime = '';
-  endTime = '';
-
-  employees: Employee[] = [];
+  filterForm!: FormGroup;
   records: AttendanceRecord[] = [];
-  filteredRecords: AttendanceRecord[] = [];
   loading = false;
   error = '';
   searched = false;
 
-  constructor(private employeeService: EmployeeService) {}
+  constructor(
+    private fb: FormBuilder,
+    private employeeService: EmployeeService
+  ) {}
 
   ngOnInit(): void {
     const today = new Date();
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-    this.fromDate = this.toDateStr(firstDay);
-    this.toDate = this.toDateStr(today);
-    this.employeeService.getAllEmployees().subscribe({
-      next: (data: Employee[]) => { this.employees = data; },
-      error: () => {}
+
+    this.filterForm = this.fb.group({
+      fromDate: [this.toDateStr(firstDay), [Validators.required]],
+      toDate:   [this.toDateStr(today),    [Validators.required]]
     });
   }
 
   search(): void {
-    if (!this.fromDate || !this.toDate) { this.error = 'Start and end date are required.'; return; }
+    if (this.filterForm.invalid) return;
+
+    const { fromDate, toDate } = this.filterForm.value;
     this.loading = true;
     this.error = '';
     this.searched = true;
-    this.employeeService.getAttendance(this.fromDate, this.toDate, this.selectedEmployeeId || undefined).subscribe({
-      next: (data: AttendanceRecord[]) => {
+
+    this.employeeService.getAttendance(fromDate, toDate).subscribe({
+      next: (data) => {
         this.records = data;
-        this.applyTimeFilter();
         this.loading = false;
       },
-      error: (err: any) => {
-        this.error = err.error?.error ?? 'Failed to load data.';
+      error: (err) => {
+        this.error = err.error?.error ?? 'Failed to load attendance data.';
         this.loading = false;
       }
     });
   }
 
-  private applyTimeFilter(): void {
-    if (!this.startTime && !this.endTime) {
-      this.filteredRecords = this.records;
-      return;
-    }
-    this.filteredRecords = this.records.filter(r => {
-      if (r.clockInTime === 'In Progress') return true;
-      const inTime = r.clockInTime;
-      const outTime = r.clockOutTime === 'In Progress' ? null : r.clockOutTime;
-      if (this.startTime && inTime < this.startTime) return false;
-      if (this.endTime && outTime && outTime > this.endTime) return false;
-      return true;
-    });
-  }
-
-  getSummary(): { name: string; id: string; totalHours: number }[] {
-    const map: { [key: string]: { name: string; id: string; totalHours: number } } = {};
-    this.filteredRecords.forEach(r => {
-      if (!map[r.employeeId]) map[r.employeeId] = { name: r.employeeName, id: r.employeeId, totalHours: 0 };
-      map[r.employeeId].totalHours += r.totalHours ?? 0;
-    });
-    return Object.values(map);
+  getTotalHours(): number {
+    return this.records
+      .filter(r => r.totalHours != null)
+      .reduce((sum, r) => sum + (r.totalHours ?? 0), 0);
   }
 
   private toDateStr(date: Date): string {
