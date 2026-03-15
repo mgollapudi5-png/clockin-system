@@ -21,4 +21,7 @@ public interface ClockLogRepository extends JpaRepository<ClockLog, Long> {
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to
     );
+
+    @Query("SELECT c FROM ClockLog c JOIN FETCH c.employee WHERE c.clockOutTime IS NULL")
+    List<ClockLog> findAllClockedIn();
 }

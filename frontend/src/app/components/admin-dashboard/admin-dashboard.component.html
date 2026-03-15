@@ -12,30 +12,85 @@
 
   <!-- Tab Navigation -->
   <nav class="tab-nav">
-    <button
-      class="tab-btn"
-      [class.active]="activeTab === 'employees'"
-      (click)="activeTab = 'employees'">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-      </svg>
-      Employee Management
+    <button class="tab-btn" [class.active]="activeTab === 'dashboard'" (click)="switchTab('dashboard')">
+      Dashboard
     </button>
-    <button
-      class="tab-btn"
-      [class.active]="activeTab === 'attendance'"
-      (click)="activeTab = 'attendance'">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-      </svg>
-      Attendance Report
+    <button class="tab-btn" [class.active]="activeTab === 'employees'" (click)="switchTab('employees')">
+      Employees
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'hours'" (click)="switchTab('hours')">
+      Hours
     </button>
   </nav>
 
   <!-- Tab Content -->
   <div class="tab-content">
-    <app-employee-list  *ngIf="activeTab === 'employees'"></app-employee-list>
-    <app-attendance-report *ngIf="activeTab === 'attendance'"></app-attendance-report>
-  </div>
 
+    <!-- DASHBOARD TAB -->
+    <div *ngIf="activeTab === 'dashboard'">
+      <div class="dash-loading" *ngIf="dashLoading">Loading dashboard...</div>
+      <div class="alert alert-error" *ngIf="dashError">{{ dashError }}</div>
+
+      <div *ngIf="!dashLoading && dashboard">
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-label">Total Employees</div>
+            <div class="stat-value">{{ dashboard.totalEmployees }}</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-label">Clocked In Now</div>
+            <div class="stat-value">{{ dashboard.clockedInCount }}</div>
+          </div>
+        </div>
+
+        <div class="dash-section">
+          <h3 class="dash-title">Currently Clocked In</h3>
+          <div class="clocked-list" *ngIf="dashboard.clockedInNames.length > 0">
+            <span class="clocked-chip" *ngFor="let name of dashboard.clockedInNames">{{ name }}</span>
+          </div>
+          <div class="empty-msg" *ngIf="dashboard.clockedInNames.length === 0">No one is clocked in right now.</div>
+        </div>
+
+        <div class="dash-section">
+          <h3 class="dash-title">Today's Activity</h3>
+          <div class="card" *ngIf="dashboard.todayActivity.length > 0">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Employee</th>
+                    <th>Clock In</th>
+                    <th>Clock Out</th>
+                    <th>Hours</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let r of dashboard.todayActivity">
+                    <td><strong>{{ r.employeeName }}</strong></td>
+                    <td><span class="badge badge-in">{{ r.clockInTime }}</span></td>
+                    <td>
+                      <span *ngIf="r.clockOutTime !== 'In Progress'" class="badge badge-out">{{ r.clockOutTime }}</span>
+                      <span *ngIf="r.clockOutTime === 'In Progress'" class="badge badge-in">In Progress</span>
+                    </td>
+                    <td>
+                      <strong *ngIf="r.totalHours !== null" class="hours-val">{{ r.totalHours | number:'1.2-2' }} hrs</strong>
+                      <span *ngIf="r.totalHours === null">—</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="empty-msg" *ngIf="dashboard.todayActivity.length === 0">No activity recorded today.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPLOYEES TAB -->
+    <app-employee-list *ngIf="activeTab === 'employees'"></app-employee-list>
+
+    <!-- HOURS TAB -->
+    <app-attendance-report *ngIf="activeTab === 'hours'"></app-attendance-report>
+
+  </div>
 </div>
