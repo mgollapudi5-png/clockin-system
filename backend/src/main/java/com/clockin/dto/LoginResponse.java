@@ -10,5 +10,4 @@ public class LoginResponse {
     private String employeeId;
     private String employeeName;
     private String role;
-    private String storeId;
 }

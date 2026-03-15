@@ -29,7 +29,6 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
-
     this.clockInterval = setInterval(() => this.currentTime = new Date(), 1000);
     this.loadStatus();
   }

@@ -22,7 +22,6 @@ export interface DashboardData {
 export interface LoginRequest {
   identifier: string;
   password: string;
-  storeId?: string;
 }
 
 export interface LoginResponse {
@@ -30,7 +29,6 @@ export interface LoginResponse {
   employeeId: string;
   employeeName: string;
   role: string;
-  storeId: string;
 }
 
 export interface CurrentUser {
@@ -38,5 +36,4 @@ export interface CurrentUser {
   employeeName: string;
   role: string;
   token: string;
-  storeId: string;
 }

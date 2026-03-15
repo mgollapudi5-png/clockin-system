@@ -16,9 +16,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(
-            @Valid @RequestBody LoginRequest request,
-            @RequestHeader(value = "X-Kiosk-Token", required = false) String kioskToken) {
-        return ResponseEntity.ok(authService.login(request, kioskToken));
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 }

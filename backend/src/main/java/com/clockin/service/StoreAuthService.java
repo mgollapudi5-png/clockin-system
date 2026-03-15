@@ -43,7 +43,7 @@ public class StoreAuthService {
         }
 
         if (store.getRole() == StoreRole.CREATOR) {
-            String token = jwtTokenProvider.generateToken(store.getStoreId(), "CREATOR", store.getStoreId());
+            String token = jwtTokenProvider.generateToken(store.getStoreId(), "CREATOR");
             return new StoreLoginResponse("CREATOR", store.getStoreName(), store.getStoreId(), null, token);
         }
 
@@ -94,11 +94,5 @@ public class StoreAuthService {
             throw new BadCredentialsException("Access denied. Creator role required.");
         }
         return jwtTokenProvider.getEmployeeIdFromToken(token);
-    }
-
-    public Store getStoreFromKioskToken(String sessionToken) {
-        return storeSessionRepository.findBySessionToken(sessionToken)
-                .map(StoreSession::getStore)
-                .orElse(null);
     }
 }

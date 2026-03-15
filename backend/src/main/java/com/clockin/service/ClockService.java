@@ -4,7 +4,9 @@ import com.clockin.dto.ClockResponse;
 import com.clockin.entity.ClockLog;
 import com.clockin.entity.Employee;
 import com.clockin.repository.ClockLogRepository;
+import com.clockin.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,11 +20,14 @@ import java.util.Optional;
 public class ClockService {
 
     private final ClockLogRepository clockLogRepository;
+    private final EmployeeRepository employeeRepository;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Transactional
-    public ClockResponse clockIn(Employee employee) {
+    public ClockResponse clockIn(String employeeId) {
+        Employee employee = getEmployee(employeeId);
+
         Optional<ClockLog> openLog = clockLogRepository
                 .findFirstByEmployeeAndClockOutTimeIsNullOrderByClockInTimeDesc(employee);
 
@@ -44,7 +49,9 @@ public class ClockService {
     }
 
     @Transactional
-    public ClockResponse clockOut(Employee employee) {
+    public ClockResponse clockOut(String employeeId) {
+        Employee employee = getEmployee(employeeId);
+
         ClockLog openLog = clockLogRepository
                 .findFirstByEmployeeAndClockOutTimeIsNullOrderByClockInTimeDesc(employee)
                 .orElseThrow(() -> new IllegalStateException("Not clocked in. Please clock in first."));
@@ -66,7 +73,9 @@ public class ClockService {
         );
     }
 
-    public ClockResponse getStatus(Employee employee) {
+    public ClockResponse getStatus(String employeeId) {
+        Employee employee = getEmployee(employeeId);
+
         Optional<ClockLog> openLog = clockLogRepository
                 .findFirstByEmployeeAndClockOutTimeIsNullOrderByClockInTimeDesc(employee);
 
@@ -78,5 +87,10 @@ public class ClockService {
             );
         }
         return new ClockResponse("Not clocked in", null, null, null, false);
+    }
+
+    private Employee getEmployee(String employeeId) {
+        return employeeRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new UsernameNotFoundException("Employee not found: " + employeeId));
     }
 }

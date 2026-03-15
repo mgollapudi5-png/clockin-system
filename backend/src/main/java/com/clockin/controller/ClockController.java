@@ -17,16 +17,16 @@ public class ClockController {
 
     @PostMapping("/in")
     public ResponseEntity<ClockResponse> clockIn(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(clockService.clockIn(userDetails.getEmployee()));
+        return ResponseEntity.ok(clockService.clockIn(userDetails.getUsername()));
     }
 
     @PostMapping("/out")
     public ResponseEntity<ClockResponse> clockOut(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(clockService.clockOut(userDetails.getEmployee()));
+        return ResponseEntity.ok(clockService.clockOut(userDetails.getUsername()));
     }
 
     @GetMapping("/status")
     public ResponseEntity<ClockResponse> getStatus(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(clockService.getStatus(userDetails.getEmployee()));
+        return ResponseEntity.ok(clockService.getStatus(userDetails.getUsername()));
     }
 }
