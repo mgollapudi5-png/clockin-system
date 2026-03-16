@@ -19,9 +19,9 @@ export class StoreAuthService {
     const deviceInfo = navigator.userAgent;
     return this.http.post<StoreLoginResponse>(`${this.apiUrl}/login`, { ...request, deviceInfo }).pipe(
       tap(res => {
-        if (res.role === 'STORE_OWNER' && res.sessionToken) {
+        if (res.role === 'STORE_OWNER') {
           const kiosk: KioskSession = {
-            sessionToken: res.sessionToken,
+            sessionToken: res.sessionToken ?? '',
             storeName: res.storeName,
             storeId: res.storeId,
             expiresAt: Date.now() + 365 * 24 * 60 * 60 * 1000
