@@ -30,7 +30,6 @@ export class AdminDashboardComponent implements OnInit {
     this.currentUser = this.authService.getCurrentUser();
 
     if (!this.storeAuthService.isKioskActive()) {
-      this.authService.logout();
       this.router.navigate(['/store-portal']);
       return;
     }

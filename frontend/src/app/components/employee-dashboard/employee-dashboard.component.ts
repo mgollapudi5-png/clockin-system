@@ -35,7 +35,6 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
     this.currentUser = this.authService.getCurrentUser();
 
     if (!this.storeAuthService.isKioskActive()) {
-      this.authService.logout();
       this.router.navigate(['/store-portal']);
       return;
     }

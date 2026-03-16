@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { StoreAuthService } from '../../services/store-auth.service';
 
 @Component({
   selector: 'app-login',
@@ -18,10 +19,17 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private storeAuthService: StoreAuthService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
+    // Block unauthorized devices before anything else
+    if (!this.storeAuthService.isKioskActive()) {
+      this.router.navigate(['/store-portal']);
+      return;
+    }
+
     // Redirect if already logged in
     if (this.authService.isLoggedIn()) {
       this.redirectByRole();
