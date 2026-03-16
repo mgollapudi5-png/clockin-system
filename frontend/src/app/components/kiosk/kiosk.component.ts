@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Router } from '@angular/router';
 import { StoreAuthService } from '../../services/store-auth.service';
 import { environment } from '../../../environments/environment';
 
@@ -26,8 +25,7 @@ export class KioskComponent implements OnInit, OnDestroy {
 
   constructor(
     private http: HttpClient,
-    private storeAuthService: StoreAuthService,
-    private router: Router
+    private storeAuthService: StoreAuthService
   ) {}
 
   ngOnInit(): void {
@@ -76,11 +74,6 @@ export class KioskComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.loading = false;
         const msg = err?.error?.error || 'Something went wrong. Please try again.';
-        if (msg.toLowerCase().includes('kiosk')) {
-          this.storeAuthService.clearKioskSession();
-          this.router.navigate(['/store-portal']);
-          return;
-        }
         this.showMessage(msg, 'error');
       }
     });

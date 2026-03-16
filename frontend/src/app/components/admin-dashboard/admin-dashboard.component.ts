@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { EmployeeService } from '../../services/employee.service';
+import { StoreAuthService } from '../../services/store-auth.service';
 import { CurrentUser, DashboardData } from '../../models/employee.model';
 
 @Component({
@@ -19,11 +21,20 @@ export class AdminDashboardComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private employeeService: EmployeeService
+    private employeeService: EmployeeService,
+    private storeAuthService: StoreAuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
+
+    if (!this.storeAuthService.isKioskActive()) {
+      this.authService.logout();
+      this.router.navigate(['/store-portal']);
+      return;
+    }
+
     this.loadDashboard();
   }
 

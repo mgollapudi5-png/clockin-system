@@ -24,7 +24,7 @@ export class StorePortalComponent {
       next: (res) => {
         this.loading = false;
         if (res.role === 'STORE_OWNER') {
-          this.router.navigate(['/kiosk']);
+          this.router.navigate(['/login']);
         } else if (res.role === 'CREATOR') {
           this.router.navigate(['/creator']);
         }
