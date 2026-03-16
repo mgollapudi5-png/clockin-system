@@ -16,6 +16,7 @@ export interface KioskSession {
   sessionToken: string;
   storeName: string;
   storeId: string;
+  expiresAt?: number;
 }
 
 export interface CreatorUser {

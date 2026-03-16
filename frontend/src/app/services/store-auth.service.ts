@@ -23,7 +23,8 @@ export class StoreAuthService {
           const kiosk: KioskSession = {
             sessionToken: res.sessionToken,
             storeName: res.storeName,
-            storeId: res.storeId
+            storeId: res.storeId,
+            expiresAt: Date.now() + 365 * 24 * 60 * 60 * 1000
           };
           localStorage.setItem(KIOSK_KEY, JSON.stringify(kiosk));
         } else if (res.role === 'CREATOR' && res.token) {
@@ -61,7 +62,14 @@ export class StoreAuthService {
   }
 
   isKioskActive(): boolean {
-    return !!this.getKioskSession();
+    const raw = localStorage.getItem(KIOSK_KEY);
+    if (!raw) return false;
+    const session: KioskSession = JSON.parse(raw);
+    if (session.expiresAt && Date.now() > session.expiresAt) {
+      localStorage.removeItem(KIOSK_KEY);
+      return false;
+    }
+    return true;
   }
 
   isCreator(): boolean {
