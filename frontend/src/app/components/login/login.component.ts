@@ -24,22 +24,20 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Block unauthorized devices before anything else
+    this.loginForm = this.fb.group({
+      identifier: ['', [Validators.required]],
+      password:   ['', [Validators.required]]
+    });
+
     if (!this.storeAuthService.isKioskActive()) {
       this.router.navigate(['/store-portal']);
       return;
     }
 
-    // Redirect if already logged in
     if (this.authService.isLoggedIn()) {
       this.redirectByRole();
       return;
     }
-
-    this.loginForm = this.fb.group({
-      identifier: ['', [Validators.required]],
-      password:   ['', [Validators.required]]
-    });
   }
 
   onSubmit(): void {
